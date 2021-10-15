@@ -52,5 +52,33 @@ class FeedViewController: UIViewController, UITableViewDelegate, UITableViewData
         // Pass the selected object to the new view controller.
     }
     */
-
+    
+    @IBAction func onLogout(_ sender: Any) {
+        PFUser.logOut()
+        let main=UIStoryboard(name: "Main", bundle: nil)
+        let loginScreen=main.instantiateViewController(withIdentifier: "LoginScreen")
+        
+//        let delegate=UIApplication.shared.delegate as! AppDelegate
+//        delegate.window?.rootViewController=loginScreen
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene, let delegate = windowScene.delegate as? SceneDelegate else { return }
+        delegate.window?.rootViewController=loginScreen
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let post = posts[indexPath.row]
+        let comment = PFObject(className: "Comments")
+        comment["text"] = "Random comment"
+        comment["post"] = post
+        comment["author"] = PFUser.current()!
+        
+        post.add(comment,forKey: "comments")
+        post.saveInBackground{(success,error) in
+            if success{
+                print("Comment saved")
+            } else{
+                print("Error saving comment")
+            }
+            
+        }
+    }
 }
